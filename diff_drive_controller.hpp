@@ -38,14 +38,14 @@ class DiffDriveController {
   DiffDriveController(const DiffDriveConfiguration& dd_conf);
 
   /**
-   * Initialize the Diff Drive Controller.
-   * Should be called after all ROS parameters are loaded.
-   * Initializes all Wheel Controllers.
+   * Initialize the Diff Drive Controller and all Wheel Controllers.
+   * @param params Parameter values to use.
    */
   void init(const DiffDriveParams& params);
 
   /**
    * Set the target speed of the robot.
+   * Automatically enables the controller.
    * @param linear The linear speed of the robot in m/s
    * @param angular The angular speed of the robot in rad/s
    */
