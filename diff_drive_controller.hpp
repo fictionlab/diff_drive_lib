@@ -2,11 +2,6 @@
 
 #include <vector>
 
-#include <ros.h>
-
-#include <leo_msgs/WheelOdom.h>
-#include <leo_msgs/WheelStates.h>
-
 #include "wheel_controller.hpp"
 
 struct DiffDriveConfiguration {
@@ -21,6 +16,21 @@ struct DiffDriveParams : WheelParams {
   float dd_wheel_separation;
   float dd_angular_velocity_multiplier;
   int dd_input_timeout;
+};
+
+struct DiffDriveOdom {
+  float velocity_lin;
+  float velocity_ang;
+  float pose_x;
+  float pose_y;
+  float pose_yaw;
+};
+
+struct DiffDriveWheelStates {
+  float position[4];
+  float velocity[4];
+  float torque[4];
+  float pwm_duty_cycle[4];
 };
 
 class DiffDriveController {
@@ -44,19 +54,17 @@ class DiffDriveController {
   /**
    * Get the current odometry.
    */
-  leo_msgs::WheelOdom getOdom();
+  DiffDriveOdom getOdom();
+
+  /**
+   * Get the current wheel states
+   */
+  DiffDriveWheelStates getWheelStates();
 
   /**
    * Reset the odometry position.
    */
   void resetOdom();
-
-  /**
-   * Retrieve the wheel states and populate the WheelStates structure fields
-   * with the new values.
-   * @param wheel_states A reference to the structure to modify
-   */
-  void updateWheelStates(leo_msgs::WheelStates& wheel_states);
 
   /**
    * Perform an update routine.
@@ -67,18 +75,15 @@ class DiffDriveController {
   void enable();
   void disable();
 
-  double positions[4];
-  double velocities[4];
-  double efforts[4];
-
+  // Wheel controllers
   WheelController wheel_FL;
   WheelController wheel_RL;
   WheelController wheel_FR;
   WheelController wheel_RR;
 
  private:
-  leo_msgs::WheelOdom odom_;
+  DiffDriveOdom odom_;
   bool enabled_ = false;
-  uint32_t last_command_time_;
+  int last_command_time_remaining_;
   DiffDriveParams params_;
 };

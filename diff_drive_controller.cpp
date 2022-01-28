@@ -37,7 +37,7 @@ void DiffDriveController::disable() {
 
 void DiffDriveController::setSpeed(const float linear, const float angular) {
   if (!enabled_) enable();
-  last_command_time_ = hFramework::sys.getRefTime();
+  last_command_time_remaining_ = params_.dd_input_timeout;
 
   const float angular_multiplied =
       angular * params_.dd_angular_velocity_multiplier;
@@ -54,7 +54,7 @@ void DiffDriveController::setSpeed(const float linear, const float angular) {
   wheel_RR.setTargetVelocity(wheel_R_ang_vel);
 }
 
-leo_msgs::WheelOdom DiffDriveController::getOdom() {
+DiffDriveOdom DiffDriveController::getOdom() {
   return odom_;
 }
 
@@ -64,33 +64,37 @@ void DiffDriveController::resetOdom() {
   odom_.pose_yaw = 0.0F;
 }
 
-void DiffDriveController::updateWheelStates(
-    leo_msgs::WheelStates& wheel_states) {
-  wheel_states.position[0] = wheel_FL.getDistance();
-  wheel_states.position[1] = wheel_RL.getDistance();
-  wheel_states.position[2] = wheel_FR.getDistance();
-  wheel_states.position[3] = wheel_RR.getDistance();
+DiffDriveWheelStates DiffDriveController::getWheelStates() {
+  DiffDriveWheelStates ws;
 
-  wheel_states.velocity[0] = wheel_FL.getVelocity();
-  wheel_states.velocity[1] = wheel_RL.getVelocity();
-  wheel_states.velocity[2] = wheel_FR.getVelocity();
-  wheel_states.velocity[3] = wheel_RR.getVelocity();
+  ws.position[0] = wheel_FL.getDistance();
+  ws.position[1] = wheel_RL.getDistance();
+  ws.position[2] = wheel_FR.getDistance();
+  ws.position[3] = wheel_RR.getDistance();
 
-  wheel_states.torque[0] = wheel_FL.getTorque();
-  wheel_states.torque[1] = wheel_RL.getTorque();
-  wheel_states.torque[2] = wheel_FR.getTorque();
-  wheel_states.torque[3] = wheel_RR.getTorque();
+  ws.velocity[0] = wheel_FL.getVelocity();
+  ws.velocity[1] = wheel_RL.getVelocity();
+  ws.velocity[2] = wheel_FR.getVelocity();
+  ws.velocity[3] = wheel_RR.getVelocity();
 
-  wheel_states.pwm_duty_cycle[0] = wheel_FL.motor.getPWMDutyCycle();
-  wheel_states.pwm_duty_cycle[1] = wheel_RL.motor.getPWMDutyCycle();
-  wheel_states.pwm_duty_cycle[2] = wheel_FR.motor.getPWMDutyCycle();
-  wheel_states.pwm_duty_cycle[3] = wheel_RR.motor.getPWMDutyCycle();
+  ws.torque[0] = wheel_FL.getTorque();
+  ws.torque[1] = wheel_RL.getTorque();
+  ws.torque[2] = wheel_FR.getTorque();
+  ws.torque[3] = wheel_RR.getTorque();
+
+  ws.pwm_duty_cycle[0] = wheel_FL.motor.getPWMDutyCycle();
+  ws.pwm_duty_cycle[1] = wheel_RL.motor.getPWMDutyCycle();
+  ws.pwm_duty_cycle[2] = wheel_FR.motor.getPWMDutyCycle();
+  ws.pwm_duty_cycle[3] = wheel_RR.motor.getPWMDutyCycle();
+
+  return ws;
 }
 
 void DiffDriveController::update(uint32_t dt_ms) {
-  if (enabled_ && hFramework::sys.getRefTime() - last_command_time_ >
-                      static_cast<uint32_t>(params_.dd_input_timeout))
-    disable();
+  if (enabled_) {
+    last_command_time_remaining_ -= dt_ms;
+    if (last_command_time_remaining_ < 0) disable();
+  }
 
   wheel_FL.update(dt_ms);
   wheel_RL.update(dt_ms);
