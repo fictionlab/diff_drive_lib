@@ -5,8 +5,6 @@
 #include <cstdint>
 #include <utility>
 
-#include <hMotor.h>
-
 #include "circular_buffer.hpp"
 #include "motor_controller_interface.hpp"
 #include "pid_regulator.hpp"
