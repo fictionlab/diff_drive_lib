@@ -16,6 +16,7 @@ struct WheelConfiguration {
 
 struct WheelParams {
   float motor_encoder_resolution;
+  float motor_torque_constant;
   float motor_pid_p;
   float motor_pid_i;
   float motor_pid_d;

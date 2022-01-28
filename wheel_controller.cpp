@@ -56,7 +56,7 @@ float WheelController::getVelocity() {
 }
 
 float WheelController::getTorque() {
-  return 0.0;
+  return motor.getWindingCurrent() * params_.motor_torque_constant;
 }
 
 float WheelController::getDistance() {
