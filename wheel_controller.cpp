@@ -10,8 +10,8 @@ WheelController::WheelController(const WheelConfiguration& wheel_conf)
       encoder_buffer_(wheel_conf.velocity_rolling_window_size) {}
 
 void WheelController::init(const WheelParams& params) {
-  v_reg_.setCoeffs(params.motor_pid_p, params.motor_pid_i, params.motor_pid_d);
-  v_reg_.setRange(std::min(1000.0F, params.motor_pwm_duty_limit * 10.0F));
+  v_reg_.setCoeffs(params.wheel_pid_p, params.wheel_pid_i, params.wheel_pid_d);
+  v_reg_.setRange(std::min(1000.0F, params.wheel_pwm_duty_limit * 10.0F));
   motor.init();
   motor.resetEncoderCnt();
   params_ = params;
@@ -48,19 +48,19 @@ void WheelController::update(const uint32_t dt_ms) {
 }
 
 void WheelController::setTargetVelocity(const float speed) {
-  v_target_ = (speed / (2.0F * PI)) * params_.motor_encoder_resolution;
+  v_target_ = (speed / (2.0F * PI)) * params_.wheel_encoder_resolution;
 }
 
 float WheelController::getVelocity() {
-  return (v_now_ / params_.motor_encoder_resolution) * (2.0F * PI);
+  return (v_now_ / params_.wheel_encoder_resolution) * (2.0F * PI);
 }
 
 float WheelController::getTorque() {
-  return motor.getWindingCurrent() * params_.motor_torque_constant;
+  return motor.getWindingCurrent() * params_.wheel_torque_constant;
 }
 
 float WheelController::getDistance() {
-  return (ticks_now_ / params_.motor_encoder_resolution) * (2.0F * PI);
+  return (ticks_now_ / params_.wheel_encoder_resolution) * (2.0F * PI);
 }
 
 void WheelController::resetDistance() {

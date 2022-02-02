@@ -19,22 +19,22 @@ struct WheelConfiguration {
 
 struct WheelParams {
   // The resolution of the wheel encoder in counts per rotation.
-  float motor_encoder_resolution;
+  float wheel_encoder_resolution;
 
   // The torque in Nm produced by the wheel per 1 Ampere of windind current.
-  float motor_torque_constant;
+  float wheel_torque_constant;
 
   // P constant of the PID regulator.
-  float motor_pid_p;
+  float wheel_pid_p;
 
   // I constant of the PID regulator.
-  float motor_pid_i;
+  float wheel_pid_i;
 
   // D constant of the PID regulator.
-  float motor_pid_d;
+  float wheel_pid_d;
 
   // The limit of the PWM duty applied to the motor in percent.
-  float motor_pwm_duty_limit;
+  float wheel_pwm_duty_limit;
 };
 
 class WheelController {
