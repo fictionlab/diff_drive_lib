@@ -19,9 +19,18 @@ void WheelController::init(const WheelParams& params) {
 
 void WheelController::update(const uint32_t dt_ms) {
   int32_t ticks_prev = ticks_now_;
-  ticks_now_ = motor.getEncoderCnt();
+  ticks_now_ = motor.getEncoderCnt() - ticks_offset_;
 
   int32_t new_ticks = ticks_now_ - ticks_prev;
+
+  if (params_.wheel_encoder_jump_detection_enabled) {
+    float ins_vel = static_cast<float>(std::abs(new_ticks)) / (dt_ms * 0.001F);
+    if (ins_vel > params_.wheel_encoder_jump_threshold) {
+      ticks_offset_ += new_ticks;
+      ticks_now_ -= new_ticks;
+      new_ticks = 0;
+    }
+  }
 
   std::pair<int32_t, uint32_t> encoder_old =
       encoder_buffer_.push_back(std::pair<int32_t, uint32_t>(new_ticks, dt_ms));
@@ -66,6 +75,7 @@ float WheelController::getDistance() {
 void WheelController::resetDistance() {
   motor.resetEncoderCnt();
   ticks_now_ = 0;
+  ticks_offset_ = 0;
 }
 
 void WheelController::enable() {

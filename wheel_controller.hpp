@@ -12,29 +12,37 @@
 struct WheelConfiguration {
   // The instance of the motor controller.
   MotorControllerInterface& motor;
-  
-  // The number of velocity samples to average together to compute wheel velocity.
+
+  // The number of velocity samples to average together to compute wheel
+  // velocity.
   size_t velocity_rolling_window_size;
 };
 
 struct WheelParams {
   // The resolution of the wheel encoder in counts per rotation.
-  float wheel_encoder_resolution;
+  float wheel_encoder_resolution = 100.0;
 
   // The torque in Nm produced by the wheel per 1 Ampere of windind current.
-  float wheel_torque_constant;
+  float wheel_torque_constant = 1.0;
 
   // P constant of the PID regulator.
-  float wheel_pid_p;
+  float wheel_pid_p = 1.0;
 
   // I constant of the PID regulator.
-  float wheel_pid_i;
+  float wheel_pid_i = 0.0;
 
   // D constant of the PID regulator.
-  float wheel_pid_d;
+  float wheel_pid_d = 0.0;
 
   // The limit of the PWM duty applied to the motor in percent.
-  float wheel_pwm_duty_limit;
+  float wheel_pwm_duty_limit = 100.0;
+
+  // Whether to detect rapid change in encoder tick count.
+  bool wheel_encoder_jump_detection_enabled = false;
+
+  // The instantaneous velocity in ticks per second over which the encoder
+  // position is assumed to have jumped.
+  float wheel_encoder_jump_threshold = 0.0;
 };
 
 class WheelController {
@@ -99,6 +107,7 @@ class WheelController {
 
   int32_t ticks_now_ = 0;
   int32_t ticks_sum_ = 0;
+  int32_t ticks_offset_ = 0;
   uint32_t dt_sum_ = 0;
 
   float v_target_ = 0.0F;
