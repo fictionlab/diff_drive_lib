@@ -10,17 +10,31 @@
 #include "pid_regulator.hpp"
 
 struct WheelConfiguration {
+  // The instance of the motor controller.
   MotorControllerInterface& motor;
-  size_t encoder_buffer_size;
+  
+  // The number of velocity samples to average together to compute wheel velocity.
+  size_t velocity_rolling_window_size;
 };
 
 struct WheelParams {
+  // The resolution of the wheel encoder in counts per rotation.
   float motor_encoder_resolution;
+
+  // The torque in Nm produced by the wheel per 1 Ampere of windind current.
   float motor_torque_constant;
+
+  // P constant of the PID regulator.
   float motor_pid_p;
+
+  // I constant of the PID regulator.
   float motor_pid_i;
+
+  // D constant of the PID regulator.
   float motor_pid_d;
-  float motor_power_limit;
+
+  // The limit of the PWM duty applied to the motor in percent.
+  float motor_pwm_duty_limit;
 };
 
 class WheelController {

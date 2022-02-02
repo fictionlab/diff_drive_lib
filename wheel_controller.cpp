@@ -7,11 +7,11 @@ static constexpr float PI = 3.141592653F;
 
 WheelController::WheelController(const WheelConfiguration& wheel_conf)
     : motor(wheel_conf.motor),
-      encoder_buffer_(wheel_conf.encoder_buffer_size) {}
+      encoder_buffer_(wheel_conf.velocity_rolling_window_size) {}
 
 void WheelController::init(const WheelParams& params) {
   v_reg_.setCoeffs(params.motor_pid_p, params.motor_pid_i, params.motor_pid_d);
-  v_reg_.setRange(std::min(1000.0F, params.motor_power_limit));
+  v_reg_.setRange(std::min(1000.0F, params.motor_pwm_duty_limit * 10.0F));
   motor.init();
   motor.resetEncoderCnt();
   params_ = params;
