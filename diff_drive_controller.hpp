@@ -12,9 +12,20 @@ struct DiffDriveConfiguration {
 };
 
 struct DiffDriveParams : WheelParams {
+  // The radius of the wheel in meters.
   float dd_wheel_radius;
+
+  // The distance (in meters) between the centers of the left and right wheels.
   float dd_wheel_separation;
+
+  // The angular velocity in setSpeed command is multiplied by this parameter
+  // and the calculated odometry has its angular velocity divided by this
+  // parameter.
   float dd_angular_velocity_multiplier;
+
+  // The timeout (in milliseconds) for the setSpeed commands. The controller
+  // will be disabled if it does not receive a command within the specified
+  // time. If set to 0, the timeout is disabled.
   int dd_input_timeout;
 };
 
@@ -57,7 +68,7 @@ class DiffDriveController {
   DiffDriveOdom getOdom();
 
   /**
-   * Get the current wheel states
+   * Get the current wheel states.
    */
   DiffDriveWheelStates getWheelStates();
 
@@ -68,11 +79,20 @@ class DiffDriveController {
 
   /**
    * Perform an update routine.
-   * @param dt_ms Time elapsed since the last call to update function
+   * @param dt_ms Time elapsed since the last call to update function.
    */
   void update(uint32_t dt_ms);
 
+  /**
+   * Enable the controller.
+   * Enabling the diff drive controller enables all wheel controllers.
+   */
   void enable();
+
+  /**
+   * Disable all wheel controllers.
+   * Disabling the diff drive controller disables all wheel controllers.
+   */
   void disable();
 
   // Wheel controllers

@@ -92,7 +92,17 @@ class WheelController {
    */
   void resetDistance();
 
+  /**
+   * Enable the controller.
+   * Starts sending PWM duty commands to the motor controller.
+   */
   void enable();
+
+  /**
+   * Disable the controller.
+   * Disabling the wheel controller stops sending PWM duty commands to the motor
+   * controller.
+   */
   void disable();
 
   MotorControllerInterface& motor;
