@@ -36,8 +36,9 @@ void DiffDriveController::disable() {
 }
 
 void DiffDriveController::setSpeed(const float linear, const float angular) {
+  if (params_.dd_input_timeout > 0)
+    last_command_time_remaining_ = params_.dd_input_timeout;
   if (!enabled_) enable();
-  last_command_time_remaining_ = params_.dd_input_timeout;
 
   const float angular_multiplied =
       angular * params_.dd_angular_velocity_multiplier;
@@ -91,7 +92,7 @@ DiffDriveWheelStates DiffDriveController::getWheelStates() {
 }
 
 void DiffDriveController::update(uint32_t dt_ms) {
-  if (enabled_) {
+  if (enabled_ && params_.dd_input_timeout > 0) {
     last_command_time_remaining_ -= dt_ms;
     if (last_command_time_remaining_ < 0) disable();
   }
