@@ -1,7 +1,9 @@
 #include <algorithm>
 
-#include "motor_controller_interface.hpp"
-#include "wheel_controller.hpp"
+#include "diff_drive_lib/motor_controller_interface.hpp"
+#include "diff_drive_lib/wheel_controller.hpp"
+
+namespace diff_drive_lib {
 
 static constexpr float PI = 3.141592653F;
 
@@ -91,3 +93,5 @@ void WheelController::disable() {
     motor.setPWMDutyCycle(0.0F);
   }
 }
+
+}  // namespace diff_drive_lib

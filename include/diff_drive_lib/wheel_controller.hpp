@@ -5,9 +5,11 @@
 #include <cstdint>
 #include <utility>
 
-#include "circular_buffer.hpp"
-#include "motor_controller_interface.hpp"
-#include "pid_regulator.hpp"
+#include "diff_drive_lib/circular_buffer.hpp"
+#include "diff_drive_lib/motor_controller_interface.hpp"
+#include "diff_drive_lib/pid_regulator.hpp"
+
+namespace diff_drive_lib {
 
 struct WheelConfiguration {
   // The instance of the motor controller.
@@ -125,3 +127,5 @@ class WheelController {
 
   WheelParams params_;
 };
+
+}  // namespace diff_drive_lib

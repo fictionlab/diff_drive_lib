@@ -2,6 +2,8 @@
 
 #include <cstdint>
 
+namespace diff_drive_lib {
+
 class PIDRegulator {
  public:
   PIDRegulator() {}
@@ -37,3 +39,5 @@ class PIDRegulator {
   float last_error_ = 0.0F;
   bool has_last_error_ = false;
 };
+
+}  // namespace diff_drive_lib

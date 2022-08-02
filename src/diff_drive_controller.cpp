@@ -1,7 +1,9 @@
 #include <cmath>
 #include <cstdio>
 
-#include "diff_drive_controller.hpp"
+#include "diff_drive_lib/diff_drive_controller.hpp"
+
+namespace diff_drive_lib {
 
 static constexpr float PI = 3.141592653F;
 
@@ -133,3 +135,5 @@ void DiffDriveController::update(uint32_t dt_ms) {
   odom_.pose_x += odom_.velocity_lin * std::cos(odom_.pose_yaw) * dt_s;
   odom_.pose_y += odom_.velocity_lin * std::sin(odom_.pose_yaw) * dt_s;
 }
+
+}  // namespace diff_drive_lib

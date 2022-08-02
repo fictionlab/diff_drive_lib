@@ -2,6 +2,8 @@
 
 #include <cstddef>
 
+namespace diff_drive_lib {
+
 template <class T>
 class CircularBuffer {
   T* values_;
@@ -22,3 +24,5 @@ class CircularBuffer {
     return tmp;
   }
 };
+
+}  // namespace diff_drive_lib

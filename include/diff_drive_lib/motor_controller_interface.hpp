@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 
+namespace diff_drive_lib {
+
 struct MotorControllerInterface {
   /**
    * Initialize the Motor Controller.
@@ -35,3 +37,5 @@ struct MotorControllerInterface {
    */
   virtual float getWindingCurrent() = 0;
 };
+
+}  // namespace diff_drive_lib

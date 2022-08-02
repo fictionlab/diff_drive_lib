@@ -2,7 +2,9 @@
 
 #include <vector>
 
-#include "wheel_controller.hpp"
+#include "diff_drive_lib/wheel_controller.hpp"
+
+namespace diff_drive_lib {
 
 struct DiffDriveConfiguration {
   WheelConfiguration wheel_FL_conf;
@@ -107,3 +109,5 @@ class DiffDriveController {
   int last_command_time_remaining_;
   DiffDriveParams params_;
 };
+
+}  // namespace diff_drive_lib

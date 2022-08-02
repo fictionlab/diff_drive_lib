@@ -1,4 +1,6 @@
-#include "pid_regulator.hpp"
+#include "diff_drive_lib/pid_regulator.hpp"
+
+namespace diff_drive_lib {
 
 inline float clamp(const float value, const float limit) {
   if (value > limit)
@@ -49,3 +51,5 @@ float PIDRegulator::update(const float error, const uint16_t dt_ms) {
 
   return val;
 }
+
+}  // namespace diff_drive_lib
