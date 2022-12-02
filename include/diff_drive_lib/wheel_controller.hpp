@@ -11,9 +11,17 @@
 
 namespace diff_drive_lib {
 
+enum class WheelOperationMode {
+  VELOCITY,
+  POSITION
+};
+
 struct WheelConfiguration {
   // The instance of the motor controller.
   MotorControllerInterface& motor;
+
+  // The operation mode to use.
+  WheelOperationMode op_mode;
 
   // The number of velocity samples to average together to compute wheel
   // velocity.
@@ -76,6 +84,11 @@ class WheelController {
   void setTargetVelocity(float speed);
 
   /**
+   * Set the target position of the wheel in rad.
+   */
+  void setTargetPosition(float position);
+
+  /**
    * Get the current velocity of the motor in rad/s.
    */
   float getVelocity();
@@ -116,7 +129,8 @@ class WheelController {
   MotorControllerInterface& motor;
 
  private:
-  PIDRegulator v_reg_;
+  PIDRegulator pid_reg_;
+  WheelOperationMode op_mode_;
   CircularBuffer<std::pair<int32_t, uint32_t>> encoder_buffer_;
 
   int16_t power_ = 0;
@@ -128,8 +142,13 @@ class WheelController {
   int32_t ticks_offset_ = 0;
   uint32_t dt_sum_ = 0;
 
-  float v_target_ = 0.0F;
   float v_now_ = 0.0F;
+
+  // Velocity mode
+  float v_target_ = 0.0F;
+
+  // Position mode
+  float ticks_target_ = 0.0F;
 
   WheelParams params_;
 };

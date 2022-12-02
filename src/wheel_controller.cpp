@@ -9,7 +9,8 @@ static constexpr float PI = 3.141592653F;
 
 WheelController::WheelController(const WheelConfiguration& wheel_conf)
     : motor(wheel_conf.motor),
-      encoder_buffer_(wheel_conf.velocity_rolling_window_size) {}
+      encoder_buffer_(wheel_conf.velocity_rolling_window_size),
+      op_mode_(wheel_conf.op_mode) {}
 
 void WheelController::init(const WheelParams& params) {
   updateParams(params);
@@ -18,8 +19,8 @@ void WheelController::init(const WheelParams& params) {
 }
 
 void WheelController::updateParams(const WheelParams& params) {
-  v_reg_.setCoeffs(params.wheel_pid_p, params.wheel_pid_i, params.wheel_pid_d);
-  v_reg_.setRange(std::min(1000.0F, params.wheel_pwm_duty_limit * 10.0F));
+  pid_reg_.setCoeffs(params.wheel_pid_p, params.wheel_pid_i, params.wheel_pid_d);
+  pid_reg_.setRange(std::min(1000.0F, params.wheel_pwm_duty_limit * 10.0F));
   params_ = params;
 }
 
@@ -50,13 +51,18 @@ void WheelController::update(const uint32_t dt_ms) {
   v_now_ = static_cast<float>(ticks_sum_) / (dt_sum_ * 0.001F);
 
   if (enabled_) {
-    float pwm_duty;
-    if (v_now_ == 0.0F && v_target_ == 0.0F) {
-      v_reg_.reset();
-      pwm_duty = 0.0F;
-    } else {
-      float v_err = v_target_ - v_now_;
-      pwm_duty = v_reg_.update(v_err, dt_ms) / 10.0F;
+    float pwm_duty = 0.0F;
+    if (op_mode_ == WheelOperationMode::VELOCITY) {
+      if (v_now_ == 0.0F && v_target_ == 0.0F) {
+        pid_reg_.reset();
+        pwm_duty = 0.0F;
+      } else {
+        float v_err = v_target_ - v_now_;
+        pwm_duty = pid_reg_.update(v_err, dt_ms) / 10.0F;
+      }
+    } else if(op_mode_ == WheelOperationMode::POSITION) {
+      float ticks_err = ticks_target_ - ticks_now_;
+      pwm_duty = pid_reg_.update(ticks_err, dt_ms) / 10.0F;
     }
     motor.setPWMDutyCycle(pwm_duty);
   }
@@ -64,6 +70,10 @@ void WheelController::update(const uint32_t dt_ms) {
 
 void WheelController::setTargetVelocity(const float speed) {
   v_target_ = (speed / (2.0F * PI)) * params_.wheel_encoder_resolution;
+}
+
+void WheelController::setTargetPosition(const float position) {
+  ticks_target_ = (position / (2.0F * PI)) * params_.wheel_encoder_resolution;
 }
 
 float WheelController::getVelocity() {
@@ -86,7 +96,7 @@ void WheelController::resetDistance() {
 
 void WheelController::enable() {
   if (!enabled_) {
-    v_reg_.reset();
+    pid_reg_.reset();
     enabled_ = true;
   }
 }
