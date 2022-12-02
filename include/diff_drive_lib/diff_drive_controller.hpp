@@ -57,6 +57,12 @@ class DiffDriveController {
   void init(const DiffDriveParams& params);
 
   /**
+   * Update parameters of Diff Drive Controller and all Wheel Controllers
+   * @param params Parameter values to use.
+   */
+  void updateParams(const DiffDriveParams& params);
+
+  /**
    * Set the target speed of the robot.
    * Automatically enables the controller.
    * @param linear The linear speed of the robot in m/s

@@ -21,6 +21,14 @@ void DiffDriveController::init(const DiffDriveParams& params) {
   params_ = params;
 }
 
+void DiffDriveController::updateParams(const DiffDriveParams& params) {
+  wheel_FL.updateParams(params);
+  wheel_RL.updateParams(params);
+  wheel_FR.updateParams(params);
+  wheel_RR.updateParams(params);
+  params_ = params;
+}
+
 void DiffDriveController::enable() {
   wheel_FL.enable();
   wheel_RL.enable();

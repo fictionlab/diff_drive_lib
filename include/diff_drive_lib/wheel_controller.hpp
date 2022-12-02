@@ -59,6 +59,12 @@ class WheelController {
   void init(const WheelParams& params);
 
   /**
+   * Update parameters of the Wheel Controller
+   * @param params Parameter values to use.
+   */
+  void updateParams(const WheelParams& params);
+
+  /**
    * Perform an update routine.
    * @param dt_ms Time elapsed since the last call to update function
    */
