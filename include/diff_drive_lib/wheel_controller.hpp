@@ -110,8 +110,9 @@ class WheelController {
 
   /**
    * Reset the distance traversed by the wheel.
+   * @param position The value to reset distance to (default 0.0).
    */
-  void resetDistance();
+  void resetDistance(float position);
 
   /**
    * Enable the controller.

@@ -9,8 +9,8 @@ static constexpr float PI = 3.141592653F;
 
 WheelController::WheelController(const WheelConfiguration& wheel_conf)
     : motor(wheel_conf.motor),
-      encoder_buffer_(wheel_conf.velocity_rolling_window_size),
-      op_mode_(wheel_conf.op_mode) {}
+      op_mode_(wheel_conf.op_mode),
+      encoder_buffer_(wheel_conf.velocity_rolling_window_size) {}
 
 void WheelController::init(const WheelParams& params) {
   updateParams(params);
@@ -88,10 +88,10 @@ float WheelController::getDistance() {
   return (ticks_now_ / params_.wheel_encoder_resolution) * (2.0F * PI);
 }
 
-void WheelController::resetDistance() {
+void WheelController::resetDistance(float position = 0.0F) {
   motor.resetEncoderCnt();
   ticks_now_ = 0;
-  ticks_offset_ = 0;
+  ticks_offset_ = (position / (2.0F * PI)) * params_.wheel_encoder_resolution;
 }
 
 void WheelController::enable() {
