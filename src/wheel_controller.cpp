@@ -19,7 +19,8 @@ void WheelController::init(const WheelParams& params) {
 }
 
 void WheelController::updateParams(const WheelParams& params) {
-  pid_reg_.setCoeffs(params.wheel_pid_p, params.wheel_pid_i, params.wheel_pid_d);
+  pid_reg_.setCoeffs(params.wheel_pid_p, params.wheel_pid_i,
+                     params.wheel_pid_d);
   pid_reg_.setRange(std::min(1000.0F, params.wheel_pwm_duty_limit * 10.0F));
   params_ = params;
 }
@@ -50,20 +51,31 @@ void WheelController::update(const uint32_t dt_ms) {
 
   v_now_ = static_cast<float>(ticks_sum_) / (dt_sum_ * 0.001F);
 
+  float target_pwm_duty = 0.0F;
   if (enabled_) {
-    float pwm_duty = 0.0F;
     if (op_mode_ == WheelOperationMode::VELOCITY) {
       if (v_now_ == 0.0F && v_target_ == 0.0F) {
         pid_reg_.reset();
-        pwm_duty = 0.0F;
+        target_pwm_duty = 0.0F;
       } else {
         float v_err = v_target_ - v_now_;
-        pwm_duty = pid_reg_.update(v_err, dt_ms) / 10.0F;
+        target_pwm_duty = pid_reg_.update(v_err, dt_ms) / 10.0F;
       }
-    } else if(op_mode_ == WheelOperationMode::POSITION) {
+    } else if (op_mode_ == WheelOperationMode::POSITION) {
       float ticks_err = ticks_target_ - ticks_now_;
-      pwm_duty = pid_reg_.update(ticks_err, dt_ms) / 10.0F;
+      target_pwm_duty = pid_reg_.update(ticks_err, dt_ms) / 10.0F;
     }
+
+    float pwm_duty;
+    float current_pwm_duty = motor.getPWMDutyCycle();
+    float max_pwm_change =
+        params_.wheel_pwm_duty_max_rate_of_change * static_cast<float>(dt_ms);
+    if (target_pwm_duty > current_pwm_duty) {
+      pwm_duty = std::min(target_pwm_duty, current_pwm_duty + max_pwm_change);
+    } else {
+      pwm_duty = std::max(target_pwm_duty, current_pwm_duty - max_pwm_change);
+    }
+
     motor.setPWMDutyCycle(pwm_duty);
   }
 }
