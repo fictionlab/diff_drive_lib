@@ -103,7 +103,7 @@ float WheelController::getDistance() {
 void WheelController::resetDistance(float position = 0.0F) {
   motor.resetEncoderCnt();
   ticks_now_ = 0;
-  ticks_offset_ = (position / (2.0F * PI)) * params_.wheel_encoder_resolution;
+  ticks_offset_ = -(position / (2.0F * PI)) * params_.wheel_encoder_resolution;
 }
 
 void WheelController::enable() {
