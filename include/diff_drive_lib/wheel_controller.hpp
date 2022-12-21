@@ -48,7 +48,7 @@ struct WheelParams {
   float wheel_pwm_duty_limit = 100.0;
 
   // The maximum rate of change in pwm duty cycle per millisecond
-  float wheel_pwm_duty_max_rate_of_change = 10.0;
+  float wheel_pwm_duty_ramp = 10.0;
 
   // Whether to detect rapid change in encoder tick count.
   bool wheel_encoder_jump_detection_enabled = false;

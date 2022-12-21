@@ -69,7 +69,7 @@ void WheelController::update(const uint32_t dt_ms) {
     float pwm_duty;
     float current_pwm_duty = motor.getPWMDutyCycle();
     float max_pwm_change =
-        params_.wheel_pwm_duty_max_rate_of_change * static_cast<float>(dt_ms);
+        params_.wheel_pwm_duty_ramp * static_cast<float>(dt_ms);
     if (target_pwm_duty > current_pwm_duty) {
       pwm_duty = std::min(target_pwm_duty, current_pwm_duty + max_pwm_change);
     } else {
