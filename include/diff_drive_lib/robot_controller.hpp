@@ -20,6 +20,9 @@ struct RobotParams : WheelParams {
   // The distance (in meters) between the centers of the left and right wheels.
   float robot_wheel_separation;
 
+  // The distance (in meters) between the centers of the rear and front wheels.
+  float robot_wheel_base;
+
   // The angular velocity in setSpeed command is multiplied by this parameter
   // and the calculated odometry has its angular velocity divided by this
   // parameter.

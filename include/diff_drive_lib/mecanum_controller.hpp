@@ -1,0 +1,18 @@
+#pragma once
+
+#include <vector>
+
+#include "diff_drive_lib/robot_controller.hpp"
+
+namespace diff_drive_lib {
+
+class MecanumController : public RobotController{
+ public:
+  using RobotController::RobotController;
+  
+  void setSpeed(float linear_x, float linear_y, float angular) override;
+
+  void update(uint32_t dt_ms) override;
+};
+
+}  // namespace diff_drive_lib
