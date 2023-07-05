@@ -46,30 +46,30 @@ void MecanumController::update(uint32_t dt_ms) {
   const float FR_ang_vel = wheel_FR.getVelocity();
   const float RR_ang_vel = wheel_RR.getVelocity();
 
-  const float L_ang_vel = (FL_ang_vel + RL_ang_vel) / 2.0F;
-  const float R_ang_vel = (FR_ang_vel + RR_ang_vel) / 2.0F;
-
-  // velocity in meters per second
-  const float L_lin_vel = L_ang_vel * params_.robot_wheel_radius;
-  const float R_lin_vel = R_ang_vel * params_.robot_wheel_radius;
-
   const float dt_s = static_cast<float>(dt_ms) * 0.001F;
 
-  // linear (m/s) and angular (r/s) velocities of the robot
-  odom_.velocity_lin_x = (L_lin_vel + R_lin_vel) / 2.0F;
-  odom_.velocity_ang = (R_lin_vel - L_lin_vel) / params_.robot_wheel_separation;
+  const float wheel_geometry = (params_.robot_wheel_base + params_.robot_wheel_separation) / 2.0F;
 
-  odom_.velocity_ang /= params_.robot_angular_velocity_multiplier;
+  const float velocity_lin_x = (FL_ang_vel+FR_ang_vel+RL_ang_vel+RR_ang_vel) * params_.robot_wheel_radius / 4.0 ;
+  const float velocity_lin_y = (-FL_ang_vel+FR_ang_vel+RL_ang_vel-RR_ang_vel) * params_.robot_wheel_radius / 4.0;
+  const float z_rotation = (-FL_ang_vel+FR_ang_vel-RL_ang_vel+RR_ang_vel) * params_.robot_wheel_radius * params_.robot_angular_velocity_multiplier / (wheel_geometry * 4.0F);
 
-  // Integrate the velocity using the rectangle rule
-  odom_.pose_yaw += odom_.velocity_ang * dt_s;
+  const float x_move = velocity_lin_x * std::cos(odom_.pose_yaw) - velocity_lin_y * std::sin(odom_.pose_yaw);
+  const float y_move = velocity_lin_x * std::sin(odom_.pose_yaw) + velocity_lin_y * std::cos(odom_.pose_yaw);
+
+  odom_.pose_x += (x_move * dt_s);
+  odom_.pose_y += (y_move * dt_s);
+
+  odom_.pose_yaw += (z_rotation * dt_s);
+
   if (odom_.pose_yaw > 2.0F * PI)
     odom_.pose_yaw -= 2.0F * PI;
   else if (odom_.pose_yaw < 0.0F)
     odom_.pose_yaw += 2.0F * PI;
 
-  odom_.pose_x += odom_.velocity_lin_x * std::cos(odom_.pose_yaw) * dt_s;
-  odom_.pose_y += odom_.velocity_lin_x * std::sin(odom_.pose_yaw) * dt_s;
+  odom_.velocity_ang = z_rotation;
+  odom_.velocity_lin_x = velocity_lin_x;
+  odom_.velocity_lin_y = velocity_lin_y;
 }
 
 }  // namespace diff_drive_lib
