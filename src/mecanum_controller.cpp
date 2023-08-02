@@ -16,7 +16,8 @@ void MecanumController::setSpeed(const float linear_x, const float linear_y,
   const float wheel_geometry =
       (params_.robot_wheel_base + params_.robot_wheel_separation) / 2.0F;
 
-  const float angular_multiplied = angular * wheel_geometry;
+  const float angular_multiplied =
+      angular * wheel_geometry * params_.robot_angular_velocity_multiplier;
   const float sum_xy = linear_x + linear_y;
   const float diff_xy = linear_x - linear_y;
 
