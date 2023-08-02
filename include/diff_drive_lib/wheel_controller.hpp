@@ -11,10 +11,7 @@
 
 namespace diff_drive_lib {
 
-enum class WheelOperationMode {
-  VELOCITY,
-  POSITION
-};
+enum class WheelOperationMode { VELOCITY, POSITION };
 
 struct WheelConfiguration {
   // The instance of the motor controller.

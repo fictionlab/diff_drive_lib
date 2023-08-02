@@ -7,7 +7,8 @@ namespace diff_drive_lib {
 
 static constexpr float PI = 3.141592653F;
 
-void DiffDriveController::setSpeed(const float linear_x, const float linear_y, const float angular) {
+void DiffDriveController::setSpeed(const float linear_x, const float linear_y,
+                                   const float angular) {
   if (params_.robot_input_timeout > 0)
     last_command_time_remaining_ = params_.robot_input_timeout;
   if (!enabled_) enable();

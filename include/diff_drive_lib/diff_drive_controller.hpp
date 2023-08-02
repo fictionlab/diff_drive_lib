@@ -6,7 +6,7 @@
 
 namespace diff_drive_lib {
 
-class DiffDriveController : public RobotController{
+class DiffDriveController : public RobotController {
  public:
   using RobotController::RobotController;
   // DiffDriveController(const DiffDriveConfiguration& dd_conf);
