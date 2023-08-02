@@ -103,7 +103,7 @@ class RobotController {
   void enable();
 
   /**
-   * Disable all wheel controllers.
+   * Disable the controller.
    * Disabling the controller disables all wheel controllers.
    */
   void disable();
