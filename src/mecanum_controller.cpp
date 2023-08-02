@@ -60,10 +60,10 @@ void MecanumController::update(uint32_t dt_ms) {
 
   const float velocity_lin_x =
       (FL_ang_vel + FR_ang_vel + RL_ang_vel + RR_ang_vel) *
-      params_.robot_wheel_radius / 4.0;
+      params_.robot_wheel_radius / 4.0F;
   const float velocity_lin_y =
       (-FL_ang_vel + FR_ang_vel + RL_ang_vel - RR_ang_vel) *
-      params_.robot_wheel_radius / 4.0;
+      params_.robot_wheel_radius / 4.0F;
   const float z_rotation =
       (-FL_ang_vel + FR_ang_vel - RL_ang_vel + RR_ang_vel) *
       params_.robot_wheel_radius * params_.robot_angular_velocity_multiplier /
