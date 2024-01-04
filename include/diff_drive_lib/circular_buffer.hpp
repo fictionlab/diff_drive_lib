@@ -17,6 +17,10 @@ class CircularBuffer {
   CircularBuffer(size_t size, T* buffer)
       : values_(buffer), size_(size), iter_(0) {}
 
+  ~CircularBuffer() {
+    delete values_;
+  }
+
   T push_back(T val) {
     T tmp = values_[iter_];
     values_[iter_++] = val;
