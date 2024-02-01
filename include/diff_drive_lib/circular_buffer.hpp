@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstddef>
-#include <atomic>
 
 namespace diff_drive_lib {
 
@@ -10,14 +9,14 @@ class CircularBuffer {
   T* values_;
   size_t size_;
   size_t iter_;
-  std::atomic_bool dynamicAlloc_;
+  const bool dynamic_alloc_;
 
  public:
   explicit CircularBuffer(size_t size)
-      : values_(new T[size]()), size_(size), iter_(0), dynamicAlloc_(true) {}
+      : values_(new T[size]()), size_(size), iter_(0), dynamic_alloc_(true) {}
 
   CircularBuffer(size_t size, T* buffer)
-      : values_(buffer), size_(size), iter_(0), dynamicAlloc_(false) {}
+      : values_(buffer), size_(size), iter_(0), dynamic_alloc_(false) {}
 
   ~CircularBuffer() {
     if (dynamicAlloc_.load())
