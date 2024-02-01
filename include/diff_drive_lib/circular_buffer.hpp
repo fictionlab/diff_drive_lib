@@ -19,7 +19,7 @@ class CircularBuffer {
       : values_(buffer), size_(size), iter_(0), dynamic_alloc_(false) {}
 
   ~CircularBuffer() {
-    if (dynamicAlloc_.load())
+    if (dynamic_alloc_)
       delete values_;
   }
 
