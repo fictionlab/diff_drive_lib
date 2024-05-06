@@ -4,29 +4,16 @@
 
 namespace diff_drive_lib {
 
-template <class T>
+template <class T, size_t SIZE>
 class CircularBuffer {
-  T* values_;
-  size_t size_;
-  size_t iter_;
-  const bool dynamic_alloc_;
+  T values_[SIZE];
+  size_t iter_ = 0;
 
  public:
-  explicit CircularBuffer(size_t size)
-      : values_(new T[size]()), size_(size), iter_(0), dynamic_alloc_(true) {}
-
-  CircularBuffer(size_t size, T* buffer)
-      : values_(buffer), size_(size), iter_(0), dynamic_alloc_(false) {}
-
-  ~CircularBuffer() {
-    if (dynamic_alloc_)
-      delete values_;
-  }
-
   T push_back(T val) {
     T tmp = values_[iter_];
     values_[iter_++] = val;
-    if (iter_ >= size_) iter_ = 0;
+    if (iter_ >= SIZE) iter_ = 0;
     return tmp;
   }
 };
