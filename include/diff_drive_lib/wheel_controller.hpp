@@ -19,6 +19,9 @@ struct WheelConfiguration {
 
   // The operation mode to use.
   WheelOperationMode op_mode;
+
+  // Whether to reverse the direction of the wheel.
+  bool reversed = false;
 };
 
 struct WheelParams {
@@ -55,7 +58,7 @@ template <size_t VELOCITY_ROLLING_WINDOW_SIZE>
 class WheelController {
  public:
   WheelController(const WheelConfiguration& wheel_conf)
-      : motor(wheel_conf.motor), op_mode_(wheel_conf.op_mode){};
+      : motor(wheel_conf.motor), op_mode_(wheel_conf.op_mode), reversed_(wheel_conf.reversed) {};
 
   /**
    * Initialize the Wheel Controller.
@@ -84,7 +87,7 @@ class WheelController {
    */
   void update(uint32_t dt_ms) {
     int32_t ticks_prev = ticks_now_;
-    ticks_now_ = motor.getEncoderCnt() - ticks_offset_;
+    ticks_now_ = this->getEncoderCnt();
 
     int32_t new_ticks = ticks_now_ - ticks_prev;
 
@@ -124,7 +127,7 @@ class WheelController {
       }
 
       float pwm_duty;
-      float current_pwm_duty = motor.getPWMDutyCycle();
+      float current_pwm_duty = this->getPWMDutyCycle();
       float max_pwm_change = params_.wheel_pwm_duty_ramp * static_cast<float>(dt_ms);
       if (target_pwm_duty > current_pwm_duty) {
         pwm_duty = std::min(target_pwm_duty, current_pwm_duty + max_pwm_change);
@@ -132,12 +135,13 @@ class WheelController {
         pwm_duty = std::max(target_pwm_duty, current_pwm_duty - max_pwm_change);
       }
 
-      motor.setPWMDutyCycle(pwm_duty);
+      this->setPWMDutyCycle(pwm_duty);
     }
   }
 
   /**
    * Set the target velocity of the wheel in rad/s.
+   * @param speed The target speed in rad/s.
    */
   void setTargetVelocity(float speed) {
     v_target_ = (speed / (2.0F * PI)) * params_.wheel_encoder_resolution;
@@ -145,9 +149,22 @@ class WheelController {
 
   /**
    * Set the target position of the wheel in rad.
+   * @param position The target position in radians.
    */
   void setTargetPosition(float position) {
     ticks_target_ = (position / (2.0F * PI)) * params_.wheel_encoder_resolution;
+  }
+
+  /**
+   * Set the PWM Duty Cycle to the motor controller.
+   * @param pwm_duty The PWM Duty Cycle in percents
+   */
+  void setPWMDutyCycle(float pwm_duty) {
+    if (reversed_) {
+      motor.setPWMDutyCycle(-pwm_duty);
+    } else {
+      motor.setPWMDutyCycle(pwm_duty);
+    }
   }
 
   /**
@@ -158,7 +175,19 @@ class WheelController {
   /**
    * Get the current PWM Duty cycle applied to the motor.
    */
-  float getPWMDutyCycle() { return motor.getPWMDutyCycle(); }
+  float getPWMDutyCycle() {
+    float duty = motor.getPWMDutyCycle();
+    return reversed_ ? -duty : duty;
+  }
+
+  /**
+   * Get the current encoder count of the motor.
+   * @return The current encoder count.
+   */
+  int32_t getEncoderCnt() {
+    int32_t raw_encoder = motor.getEncoderCnt();
+    return (reversed_ ? -raw_encoder : raw_encoder) + ticks_offset_;
+  }
 
   /**
    * Get the current output torque of the motor.
@@ -208,6 +237,7 @@ class WheelController {
  private:
   PIDRegulator pid_reg_;
   WheelOperationMode op_mode_;
+  bool reversed_;
   CircularBuffer<std::pair<int32_t, uint32_t>, VELOCITY_ROLLING_WINDOW_SIZE> encoder_buffer_;
 
   int16_t power_ = 0;

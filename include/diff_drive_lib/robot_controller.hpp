@@ -118,10 +118,10 @@ class RobotController {
     ws.torque[2] = wheel_FR.getTorque();
     ws.torque[3] = wheel_RR.getTorque();
 
-    ws.pwm_duty_cycle[0] = wheel_FL.motor.getPWMDutyCycle();
-    ws.pwm_duty_cycle[1] = wheel_RL.motor.getPWMDutyCycle();
-    ws.pwm_duty_cycle[2] = wheel_FR.motor.getPWMDutyCycle();
-    ws.pwm_duty_cycle[3] = wheel_RR.motor.getPWMDutyCycle();
+    ws.pwm_duty_cycle[0] = wheel_FL.getPWMDutyCycle();
+    ws.pwm_duty_cycle[1] = wheel_RL.getPWMDutyCycle();
+    ws.pwm_duty_cycle[2] = wheel_FR.getPWMDutyCycle();
+    ws.pwm_duty_cycle[3] = wheel_RR.getPWMDutyCycle();
 
     return ws;
   }
