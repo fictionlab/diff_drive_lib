@@ -11,7 +11,7 @@ class DiffDriveController : public RobotController<VELOCITY_ROLLING_WINDOW_SIZE>
  public:
   using RobotController<VELOCITY_ROLLING_WINDOW_SIZE>::RobotController;
 
-  void setSpeed(float linear_x, float linear_y, float angular) override {
+  void setSpeed(float linear_x, float /*linear_y*/, float angular) override {
     if (this->params_.robot_input_timeout > 0)
       this->last_command_time_remaining_ = this->params_.robot_input_timeout;
     if (!this->enabled_) this->enable();
