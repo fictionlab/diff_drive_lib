@@ -11,6 +11,19 @@ struct MotorControllerInterface {
   virtual void init() = 0;
 
   /**
+   * Set the battery voltage used for voltage-to-PWM conversion.
+   * @param voltage Battery voltage in Volts
+   */
+  virtual void setBatteryVoltage(float voltage) = 0;
+
+  /**
+   * Set the desired motor voltage. The motor controller converts this
+   * to a PWM duty cycle based on the current battery voltage.
+   * @param voltage Desired motor voltage in Volts
+   */
+  virtual void setVoltage(float voltage) = 0;
+
+  /**
    * Set the PWM Duty Cycle to the motor driver
    * @param pwm_duty The PWM Duty Cycle in percents
    */
