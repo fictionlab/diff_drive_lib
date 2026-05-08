@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "diff_drive_lib/robot_controller.hpp"
+#include "diff_drive_lib/utils.hpp"
 
 namespace diff_drive_lib {
 
@@ -16,18 +17,8 @@ class DiffDriveController : public RobotController<VELOCITY_ROLLING_WINDOW_SIZE>
       this->last_command_time_remaining_ = this->params_.robot_input_timeout;
     if (!this->enabled_) this->enable();
 
-    const float angular_multiplied = angular * this->params_.robot_angular_velocity_multiplier;
-    const float wheel_L_lin_vel =
-        linear_x - (angular_multiplied * this->params_.robot_wheel_separation / 2.0F);
-    const float wheel_R_lin_vel =
-        linear_x + (angular_multiplied * this->params_.robot_wheel_separation / 2.0F);
-    const float wheel_L_ang_vel = wheel_L_lin_vel / this->params_.robot_wheel_radius;
-    const float wheel_R_ang_vel = wheel_R_lin_vel / this->params_.robot_wheel_radius;
-
-    this->wheel_FL.setTargetVelocity(wheel_L_ang_vel);
-    this->wheel_RL.setTargetVelocity(wheel_L_ang_vel);
-    this->wheel_FR.setTargetVelocity(wheel_R_ang_vel);
-    this->wheel_RR.setTargetVelocity(wheel_R_ang_vel);
+    target_linear_x_ = linear_x;
+    target_angular_ = angular;
   }
 
   void update(uint32_t dt_ms) override {
@@ -35,6 +26,31 @@ class DiffDriveController : public RobotController<VELOCITY_ROLLING_WINDOW_SIZE>
       this->last_command_time_remaining_ -= dt_ms;
       if (this->last_command_time_remaining_ < 0) this->disable();
     }
+
+    const float dt_s = static_cast<float>(dt_ms) * 0.001F;
+
+    // Ramp linear velocity
+    cmd_linear_x_ = rampValue(cmd_linear_x_, target_linear_x_, dt_s,
+                              this->params_.robot_linear_acceleration,
+                              this->params_.robot_linear_deceleration);
+
+    // Ramp angular velocity
+    cmd_angular_ = rampValue(cmd_angular_, target_angular_, dt_s,
+                             this->params_.robot_angular_acceleration,
+                             this->params_.robot_angular_deceleration);
+
+    const float angular_multiplied = cmd_angular_ * this->params_.robot_angular_velocity_multiplier;
+    const float wheel_L_lin_vel =
+        cmd_linear_x_ - (angular_multiplied * this->params_.robot_wheel_separation / 2.0F);
+    const float wheel_R_lin_vel =
+        cmd_linear_x_ + (angular_multiplied * this->params_.robot_wheel_separation / 2.0F);
+    const float wheel_L_ang_vel = wheel_L_lin_vel / this->params_.robot_wheel_radius;
+    const float wheel_R_ang_vel = wheel_R_lin_vel / this->params_.robot_wheel_radius;
+
+    this->wheel_FL.setTargetVelocity(wheel_L_ang_vel);
+    this->wheel_RL.setTargetVelocity(wheel_L_ang_vel);
+    this->wheel_FR.setTargetVelocity(wheel_R_ang_vel);
+    this->wheel_RR.setTargetVelocity(wheel_R_ang_vel);
 
     this->wheel_FL.update(dt_ms);
     this->wheel_RL.update(dt_ms);
@@ -54,8 +70,6 @@ class DiffDriveController : public RobotController<VELOCITY_ROLLING_WINDOW_SIZE>
     const float L_lin_vel = L_ang_vel * this->params_.robot_wheel_radius;
     const float R_lin_vel = R_ang_vel * this->params_.robot_wheel_radius;
 
-    const float dt_s = static_cast<float>(dt_ms) * 0.001F;
-
     // linear (m/s) and angular (r/s) velocities of the robot
     this->odom_.velocity_lin_x = (L_lin_vel + R_lin_vel) / 2.0F;
     this->odom_.velocity_ang = (R_lin_vel - L_lin_vel) / this->params_.robot_wheel_separation;
@@ -74,6 +88,11 @@ class DiffDriveController : public RobotController<VELOCITY_ROLLING_WINDOW_SIZE>
   }
 
  private:
+  float target_linear_x_ = 0.0F;
+  float target_angular_ = 0.0F;
+  float cmd_linear_x_ = 0.0F;
+  float cmd_angular_ = 0.0F;
+
   static constexpr float PI = 3.141592653F;
 };
 

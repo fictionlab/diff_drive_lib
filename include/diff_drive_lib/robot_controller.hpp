@@ -32,6 +32,18 @@ struct RobotParams : WheelParams {
   // will be disabled if it does not receive a command within the specified
   // time. If set to 0, the timeout is disabled.
   int robot_input_timeout;
+
+  // Maximum linear acceleration in m/s^2. 0 means no limit.
+  float robot_linear_acceleration = 0.5F;
+
+  // Maximum linear deceleration in m/s^2. 0 means no limit.
+  float robot_linear_deceleration = 2.0F;
+
+  // Maximum angular acceleration in rad/s^2. 0 means no limit.
+  float robot_angular_acceleration = 2.0F;
+
+  // Maximum angular deceleration in rad/s^2. 0 means no limit.
+  float robot_angular_deceleration = 4.0F;
 };
 
 struct RobotOdom {
