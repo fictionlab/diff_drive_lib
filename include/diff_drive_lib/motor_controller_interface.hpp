@@ -51,4 +51,19 @@ struct MotorControllerInterface {
   virtual float getWindingCurrent() = 0;
 };
 
+struct MotorControllerBase : public MotorControllerInterface {
+  void setBatteryVoltage(float voltage) { battery_voltage_ = voltage; }
+
+  void setVoltage(float voltage) {
+    if (battery_voltage_ > 0.0F) {
+      setPWMDutyCycle((voltage / battery_voltage_) * 100.0F);
+    } else {
+      setPWMDutyCycle(0.0F);
+    }
+  }
+
+ protected:
+  float battery_voltage_ = 0.0F;
+};
+
 }  // namespace diff_drive_lib
