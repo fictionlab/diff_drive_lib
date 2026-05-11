@@ -39,18 +39,20 @@ class DiffDriveController : public RobotController<VELOCITY_ROLLING_WINDOW_SIZE>
                              this->params_.robot_angular_acceleration,
                              this->params_.robot_angular_deceleration);
 
-    const float angular_multiplied = cmd_angular_ * this->params_.robot_angular_velocity_multiplier;
-    const float wheel_L_lin_vel =
-        cmd_linear_x_ - (angular_multiplied * this->params_.robot_wheel_separation / 2.0F);
-    const float wheel_R_lin_vel =
-        cmd_linear_x_ + (angular_multiplied * this->params_.robot_wheel_separation / 2.0F);
-    const float wheel_L_ang_vel = wheel_L_lin_vel / this->params_.robot_wheel_radius;
-    const float wheel_R_ang_vel = wheel_R_lin_vel / this->params_.robot_wheel_radius;
+    if (this->enabled_) {
+      const float angular_multiplied = cmd_angular_ * this->params_.robot_angular_velocity_multiplier;
+      const float wheel_L_lin_vel =
+          cmd_linear_x_ - (angular_multiplied * this->params_.robot_wheel_separation / 2.0F);
+      const float wheel_R_lin_vel =
+          cmd_linear_x_ + (angular_multiplied * this->params_.robot_wheel_separation / 2.0F);
+      const float wheel_L_ang_vel = wheel_L_lin_vel / this->params_.robot_wheel_radius;
+      const float wheel_R_ang_vel = wheel_R_lin_vel / this->params_.robot_wheel_radius;
 
-    this->wheel_FL.setTargetVelocity(wheel_L_ang_vel);
-    this->wheel_RL.setTargetVelocity(wheel_L_ang_vel);
-    this->wheel_FR.setTargetVelocity(wheel_R_ang_vel);
-    this->wheel_RR.setTargetVelocity(wheel_R_ang_vel);
+      this->wheel_FL.setTargetVelocity(wheel_L_ang_vel);
+      this->wheel_RL.setTargetVelocity(wheel_L_ang_vel);
+      this->wheel_FR.setTargetVelocity(wheel_R_ang_vel);
+      this->wheel_RR.setTargetVelocity(wheel_R_ang_vel);
+    }
 
     this->wheel_FL.update(dt_ms);
     this->wheel_RL.update(dt_ms);

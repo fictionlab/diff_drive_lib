@@ -46,20 +46,22 @@ class MecanumController : public RobotController<VELOCITY_ROLLING_WINDOW_SIZE> {
     const float wheel_geometry =
         (this->params_.robot_wheel_base + this->params_.robot_wheel_separation) / 2.0F;
 
-    const float angular_multiplied =
-        cmd_angular_ * wheel_geometry * this->params_.robot_angular_velocity_multiplier;
-    const float sum_xy = cmd_linear_x_ + cmd_linear_y_;
-    const float diff_xy = cmd_linear_x_ - cmd_linear_y_;
+    if (this->enabled_) {
+      const float angular_multiplied =
+          cmd_angular_ * wheel_geometry * this->params_.robot_angular_velocity_multiplier;
+      const float sum_xy = cmd_linear_x_ + cmd_linear_y_;
+      const float diff_xy = cmd_linear_x_ - cmd_linear_y_;
 
-    const float wheel_FL_vel = (diff_xy - angular_multiplied) / this->params_.robot_wheel_radius;
-    const float wheel_FR_vel = (sum_xy + angular_multiplied) / this->params_.robot_wheel_radius;
-    const float wheel_RL_vel = (sum_xy - angular_multiplied) / this->params_.robot_wheel_radius;
-    const float wheel_RR_vel = (diff_xy + angular_multiplied) / this->params_.robot_wheel_radius;
+      const float wheel_FL_vel = (diff_xy - angular_multiplied) / this->params_.robot_wheel_radius;
+      const float wheel_FR_vel = (sum_xy + angular_multiplied) / this->params_.robot_wheel_radius;
+      const float wheel_RL_vel = (sum_xy - angular_multiplied) / this->params_.robot_wheel_radius;
+      const float wheel_RR_vel = (diff_xy + angular_multiplied) / this->params_.robot_wheel_radius;
 
-    this->wheel_FL.setTargetVelocity(wheel_FL_vel);
-    this->wheel_RL.setTargetVelocity(wheel_RL_vel);
-    this->wheel_FR.setTargetVelocity(wheel_FR_vel);
-    this->wheel_RR.setTargetVelocity(wheel_RR_vel);
+      this->wheel_FL.setTargetVelocity(wheel_FL_vel);
+      this->wheel_RL.setTargetVelocity(wheel_RL_vel);
+      this->wheel_FR.setTargetVelocity(wheel_FR_vel);
+      this->wheel_RR.setTargetVelocity(wheel_RR_vel);
+    }
 
     this->wheel_FL.update(dt_ms);
     this->wheel_RL.update(dt_ms);
