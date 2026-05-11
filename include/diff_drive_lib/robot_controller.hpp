@@ -184,6 +184,29 @@ class RobotController {
   WheelController<VELOCITY_ROLLING_WINDOW_SIZE> wheel_RR;
 
  protected:
+  void checkTimeout(uint32_t dt_ms) {
+    if (enabled_ && params_.robot_input_timeout > 0) {
+      last_command_time_remaining_ -= dt_ms;
+      if (last_command_time_remaining_ < 0) disable();
+    }
+  }
+
+  void updateWheels(uint32_t dt_ms) {
+    wheel_FL.update(dt_ms);
+    wheel_RL.update(dt_ms);
+    wheel_FR.update(dt_ms);
+    wheel_RR.update(dt_ms);
+  }
+
+  void wrapYaw() {
+    if (odom_.pose_yaw > 2.0F * PI)
+      odom_.pose_yaw -= 2.0F * PI;
+    else if (odom_.pose_yaw < 0.0F)
+      odom_.pose_yaw += 2.0F * PI;
+  }
+
+  static constexpr float PI = 3.141592653F;
+
   RobotOdom odom_;
   bool enabled_ = false;
   int last_command_time_remaining_;
