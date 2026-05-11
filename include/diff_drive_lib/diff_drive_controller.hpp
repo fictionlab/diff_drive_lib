@@ -29,17 +29,17 @@ class DiffDriveController : public RobotController<VELOCITY_ROLLING_WINDOW_SIZE>
 
     const float dt_s = static_cast<float>(dt_ms) * 0.001F;
 
-    // Ramp linear velocity
-    cmd_linear_x_ = rampValue(cmd_linear_x_, target_linear_x_, dt_s,
-                              this->params_.robot_linear_acceleration,
-                              this->params_.robot_linear_deceleration);
-
-    // Ramp angular velocity
-    cmd_angular_ = rampValue(cmd_angular_, target_angular_, dt_s,
-                             this->params_.robot_angular_acceleration,
-                             this->params_.robot_angular_deceleration);
-
     if (this->enabled_) {
+      // Ramp linear velocity
+      cmd_linear_x_ = rampValue(cmd_linear_x_, target_linear_x_, dt_s,
+                                this->params_.robot_linear_acceleration,
+                                this->params_.robot_linear_deceleration);
+
+      // Ramp angular velocity
+      cmd_angular_ = rampValue(cmd_angular_, target_angular_, dt_s,
+                               this->params_.robot_angular_acceleration,
+                               this->params_.robot_angular_deceleration);
+
       const float angular_multiplied = cmd_angular_ * this->params_.robot_angular_velocity_multiplier;
       const float wheel_L_lin_vel =
           cmd_linear_x_ - (angular_multiplied * this->params_.robot_wheel_separation / 2.0F);
@@ -87,6 +87,14 @@ class DiffDriveController : public RobotController<VELOCITY_ROLLING_WINDOW_SIZE>
 
     this->odom_.pose_x += this->odom_.velocity_lin_x * std::cos(this->odom_.pose_yaw) * dt_s;
     this->odom_.pose_y += this->odom_.velocity_lin_x * std::sin(this->odom_.pose_yaw) * dt_s;
+  }
+
+  void disable() override {
+    RobotController<VELOCITY_ROLLING_WINDOW_SIZE>::disable();
+    target_linear_x_ = 0.0F;
+    target_angular_ = 0.0F;
+    cmd_linear_x_ = 0.0F;
+    cmd_angular_ = 0.0F;
   }
 
  private:

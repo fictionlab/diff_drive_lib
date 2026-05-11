@@ -169,7 +169,7 @@ class RobotController {
    * Disable the controller.
    * Disabling the controller disables all wheel controllers.
    */
-  void disable() {
+  virtual void disable() {
     wheel_FL.disable();
     wheel_RL.disable();
     wheel_FR.disable();

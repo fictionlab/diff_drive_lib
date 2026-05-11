@@ -30,23 +30,23 @@ class MecanumController : public RobotController<VELOCITY_ROLLING_WINDOW_SIZE> {
 
     const float dt_s = static_cast<float>(dt_ms) * 0.001F;
 
-    // Ramp linear velocities
-    cmd_linear_x_ = rampValue(cmd_linear_x_, target_linear_x_, dt_s,
-                              this->params_.robot_linear_acceleration,
-                              this->params_.robot_linear_deceleration);
-    cmd_linear_y_ = rampValue(cmd_linear_y_, target_linear_y_, dt_s,
-                              this->params_.robot_linear_acceleration,
-                              this->params_.robot_linear_deceleration);
-
-    // Ramp angular velocity
-    cmd_angular_ = rampValue(cmd_angular_, target_angular_, dt_s,
-                             this->params_.robot_angular_acceleration,
-                             this->params_.robot_angular_deceleration);
-
     const float wheel_geometry =
         (this->params_.robot_wheel_base + this->params_.robot_wheel_separation) / 2.0F;
 
     if (this->enabled_) {
+      // Ramp linear velocities
+      cmd_linear_x_ = rampValue(cmd_linear_x_, target_linear_x_, dt_s,
+                                this->params_.robot_linear_acceleration,
+                                this->params_.robot_linear_deceleration);
+      cmd_linear_y_ = rampValue(cmd_linear_y_, target_linear_y_, dt_s,
+                                this->params_.robot_linear_acceleration,
+                                this->params_.robot_linear_deceleration);
+
+      // Ramp angular velocity
+      cmd_angular_ = rampValue(cmd_angular_, target_angular_, dt_s,
+                               this->params_.robot_angular_acceleration,
+                               this->params_.robot_angular_deceleration);
+
       const float angular_multiplied =
           cmd_angular_ * wheel_geometry * this->params_.robot_angular_velocity_multiplier;
       const float sum_xy = cmd_linear_x_ + cmd_linear_y_;
@@ -100,6 +100,16 @@ class MecanumController : public RobotController<VELOCITY_ROLLING_WINDOW_SIZE> {
     this->odom_.velocity_ang = z_rotation;
     this->odom_.velocity_lin_x = velocity_lin_x;
     this->odom_.velocity_lin_y = velocity_lin_y;
+  }
+
+  void disable() override {
+    RobotController<VELOCITY_ROLLING_WINDOW_SIZE>::disable();
+    target_linear_x_ = 0.0F;
+    target_linear_y_ = 0.0F;
+    target_angular_ = 0.0F;
+    cmd_linear_x_ = 0.0F;
+    cmd_linear_y_ = 0.0F;
+    cmd_angular_ = 0.0F;
   }
 
  private:
