@@ -73,7 +73,7 @@ struct MotorControllerBase : public MotorControllerInterface {
   }
 
  protected:
-  float supply_voltage_ = 0.0F;
+  float supply_voltage_ = 12.0F;
 };
 
 }  // namespace diff_drive_lib
