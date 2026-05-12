@@ -107,6 +107,8 @@ class WheelController {
 
     float target_voltage = 0.0F;
     if (enabled_) {
+      pid_reg_.setRange(motor.getSupplyVoltage());
+
       if (op_mode_ == WheelOperationMode::VELOCITY) {
         if (v_now_ == 0.0F && v_target_ == 0.0F) {
           pid_reg_.reset();

@@ -11,14 +11,20 @@ struct MotorControllerInterface {
   virtual void init() = 0;
 
   /**
-   * Set the battery voltage used for voltage-to-PWM conversion.
-   * @param voltage Battery voltage in Volts
+   * Set the supply voltage (voltage applied to the motor at 100% PWM).
+   * @param voltage Supply voltage in Volts
    */
-  virtual void setBatteryVoltage(float voltage) = 0;
+  virtual void setSupplyVoltage(float voltage) = 0;
+
+  /**
+   * Get the supply voltage (voltage applied to the motor at 100% PWM).
+   * @return Supply voltage in Volts
+   */
+  virtual float getSupplyVoltage() = 0;
 
   /**
    * Set the desired motor voltage. The motor controller converts this
-   * to a PWM duty cycle based on the current battery voltage.
+   * to a PWM duty cycle based on the current supply voltage.
    * @param voltage Desired motor voltage in Volts
    */
   virtual void setVoltage(float voltage) = 0;
@@ -52,18 +58,19 @@ struct MotorControllerInterface {
 };
 
 struct MotorControllerBase : public MotorControllerInterface {
-  void setBatteryVoltage(float voltage) { battery_voltage_ = voltage; }
+  void setSupplyVoltage(float voltage) { supply_voltage_ = voltage; }
+  float getSupplyVoltage() override { return supply_voltage_; }
 
   void setVoltage(float voltage) {
-    if (battery_voltage_ > 0.0F) {
-      setPWMDutyCycle((voltage / battery_voltage_) * 100.0F);
+    if (supply_voltage_ > 0.0F) {
+      setPWMDutyCycle((voltage / supply_voltage_) * 100.0F);
     } else {
       setPWMDutyCycle(0.0F);
     }
   }
 
  protected:
-  float battery_voltage_ = 0.0F;
+  float supply_voltage_ = 0.0F;
 };
 
 }  // namespace diff_drive_lib
