@@ -32,6 +32,18 @@ struct RobotParams : WheelParams {
   // will be disabled if it does not receive a command within the specified
   // time. If set to 0, the timeout is disabled.
   int robot_input_timeout;
+
+  // Maximum linear acceleration in m/s^2. 0 means no limit.
+  float robot_linear_acceleration = 0.5F;
+
+  // Maximum linear deceleration in m/s^2. 0 means no limit.
+  float robot_linear_deceleration = 2.0F;
+
+  // Maximum angular acceleration in rad/s^2. 0 means no limit.
+  float robot_angular_acceleration = 2.0F;
+
+  // Maximum angular deceleration in rad/s^2. 0 means no limit.
+  float robot_angular_deceleration = 4.0F;
 };
 
 struct RobotOdom {
@@ -157,7 +169,7 @@ class RobotController {
    * Disable the controller.
    * Disabling the controller disables all wheel controllers.
    */
-  void disable() {
+  virtual void disable() {
     wheel_FL.disable();
     wheel_RL.disable();
     wheel_FR.disable();
@@ -172,6 +184,29 @@ class RobotController {
   WheelController<VELOCITY_ROLLING_WINDOW_SIZE> wheel_RR;
 
  protected:
+  void checkTimeout(uint32_t dt_ms) {
+    if (enabled_ && params_.robot_input_timeout > 0) {
+      last_command_time_remaining_ -= dt_ms;
+      if (last_command_time_remaining_ < 0) disable();
+    }
+  }
+
+  void updateWheels(uint32_t dt_ms) {
+    wheel_FL.update(dt_ms);
+    wheel_RL.update(dt_ms);
+    wheel_FR.update(dt_ms);
+    wheel_RR.update(dt_ms);
+  }
+
+  void wrapYaw() {
+    if (odom_.pose_yaw > 2.0F * PI)
+      odom_.pose_yaw -= 2.0F * PI;
+    else if (odom_.pose_yaw < 0.0F)
+      odom_.pose_yaw += 2.0F * PI;
+  }
+
+  static constexpr float PI = 3.141592653F;
+
   RobotOdom odom_;
   bool enabled_ = false;
   int last_command_time_remaining_;

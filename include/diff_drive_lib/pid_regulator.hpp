@@ -1,17 +1,11 @@
 #pragma once
 
 #include <cstdint>
+#include <cmath>
+
+#include "diff_drive_lib/utils.hpp"
 
 namespace diff_drive_lib {
-
-inline float clamp(const float value, const float limit) {
-  if (value > limit)
-    return limit;
-  else if (value < -limit)
-    return -limit;
-  else
-    return value;
-}
 
 class PIDRegulator {
  public:
@@ -45,33 +39,42 @@ class PIDRegulator {
   /**
    * Perform an update routine of the regulator.
    * @param error Current error
-   * @param dt_ms Time elapsed since the last call to update function
+   * @param dt_ms Time elapsed since the last call to update function in milliseconds
    * @return Output of the regulator
    */
-  float update(float error, uint16_t dt_ms) {
-    float cur_err;
+  float update(float error, uint32_t dt_ms) {
+    if (dt_ms == 0) return 0.0F;
+
+    float err_diff;
     if (has_last_error_) {
-      cur_err = error - last_error_;
+      err_diff = error - last_error_;
     } else {
-      cur_err = 0;
+      err_diff = 0;
       has_last_error_ = true;
     }
     last_error_ = error;
 
-    isum_ += Ki_ * error * static_cast<float>(dt_ms);
+    const float dt_s = static_cast<float>(dt_ms) * 0.001F;
 
-    // Anti-windup
-    isum_ = clamp(isum_, range_);
+    // P term + D term
+    float val = Kp_ * error + Kd_ * err_diff / dt_s;
 
-    float val = Kp_ * error + isum_ + Kd_ * cur_err / static_cast<float>(dt_ms);
-    val = clamp(val, range_);
+    // I term
+    isum_ += Ki_ * error * dt_s;
+
+    // I-term Anti-windup: limit isum to remaining headroom, but never a negative limit
+    const float headroom = range_ - std::abs(val);
+    isum_ = clamp(isum_, headroom > 0.0F ? headroom : 0.0F);
+
+    // Output
+    val = clamp(val + isum_, range_);
 
     return val;
   }
 
  private:
   float Kp_ = 1.0F, Ki_ = 0.0F, Kd_ = 0.0F;
-  float range_ = 1000.0;
+  float range_ = 30.0F;
   float isum_ = 0.0F;
   float last_error_ = 0.0F;
   bool has_last_error_ = false;

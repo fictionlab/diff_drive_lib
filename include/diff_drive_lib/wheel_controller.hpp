@@ -40,12 +40,6 @@ struct WheelParams {
   // D constant of the PID regulator.
   float wheel_pid_d = 0.0;
 
-  // The limit of the PWM duty applied to the motor in percent.
-  float wheel_pwm_duty_limit = 100.0;
-
-  // The maximum rate of change in pwm duty cycle per millisecond
-  float wheel_pwm_duty_ramp = 10.0;
-
   // Whether to detect rapid change in encoder tick count.
   bool wheel_encoder_jump_detection_enabled = false;
 
@@ -77,7 +71,6 @@ class WheelController {
    */
   void updateParams(const WheelParams& params) {
     pid_reg_.setCoeffs(params.wheel_pid_p, params.wheel_pid_i, params.wheel_pid_d);
-    pid_reg_.setRange(std::min(1000.0F, params.wheel_pwm_duty_limit * 10.0F));
     params_ = params;
   }
 
@@ -109,33 +102,27 @@ class WheelController {
     ticks_sum_ -= encoder_old.first;
     dt_sum_ -= encoder_old.second;
 
-    v_now_ = static_cast<float>(ticks_sum_) / (dt_sum_ * 0.001F);
+    v_now_ = (static_cast<float>(ticks_sum_) / (dt_sum_ * 0.001F)) *
+             (2.0F * PI / params_.wheel_encoder_resolution);
 
-    float target_pwm_duty = 0.0F;
+    float target_voltage = 0.0F;
     if (enabled_) {
+      pid_reg_.setRange(motor.getSupplyVoltage());
+
       if (op_mode_ == WheelOperationMode::VELOCITY) {
         if (v_now_ == 0.0F && v_target_ == 0.0F) {
           pid_reg_.reset();
-          target_pwm_duty = 0.0F;
+          target_voltage = 0.0F;
         } else {
           float v_err = v_target_ - v_now_;
-          target_pwm_duty = pid_reg_.update(v_err, dt_ms) / 10.0F;
+          target_voltage = pid_reg_.update(v_err, dt_ms);
         }
       } else if (op_mode_ == WheelOperationMode::POSITION) {
         float ticks_err = ticks_target_ - ticks_now_;
-        target_pwm_duty = pid_reg_.update(ticks_err, dt_ms) / 10.0F;
+        target_voltage = pid_reg_.update(ticks_err, dt_ms);
       }
 
-      float pwm_duty;
-      float current_pwm_duty = this->getPWMDutyCycle();
-      float max_pwm_change = params_.wheel_pwm_duty_ramp * static_cast<float>(dt_ms);
-      if (target_pwm_duty > current_pwm_duty) {
-        pwm_duty = std::min(target_pwm_duty, current_pwm_duty + max_pwm_change);
-      } else {
-        pwm_duty = std::max(target_pwm_duty, current_pwm_duty - max_pwm_change);
-      }
-
-      this->setPWMDutyCycle(pwm_duty);
+      this->setVoltage(target_voltage);
     }
   }
 
@@ -143,9 +130,7 @@ class WheelController {
    * Set the target velocity of the wheel in rad/s.
    * @param speed The target speed in rad/s.
    */
-  void setTargetVelocity(float speed) {
-    v_target_ = (speed / (2.0F * PI)) * params_.wheel_encoder_resolution;
-  }
+  void setTargetVelocity(float speed) { v_target_ = speed; }
 
   /**
    * Set the target position of the wheel in rad.
@@ -153,6 +138,18 @@ class WheelController {
    */
   void setTargetPosition(float position) {
     ticks_target_ = (position / (2.0F * PI)) * params_.wheel_encoder_resolution;
+  }
+
+  /**
+   * Set the desired motor voltage.
+   * @param voltage The desired voltage in Volts
+   */
+  void setVoltage(float voltage) {
+    if (reversed_) {
+      motor.setVoltage(-voltage);
+    } else {
+      motor.setVoltage(voltage);
+    }
   }
 
   /**
@@ -170,7 +167,7 @@ class WheelController {
   /**
    * Get the current velocity of the motor in rad/s.
    */
-  float getVelocity() { return (v_now_ / params_.wheel_encoder_resolution) * (2.0F * PI); }
+  float getVelocity() { return v_now_; }
 
   /**
    * Get the current PWM Duty cycle applied to the motor.
@@ -228,7 +225,7 @@ class WheelController {
   void disable() {
     if (enabled_) {
       enabled_ = false;
-      motor.setPWMDutyCycle(0.0F);
+      motor.setVoltage(0.0F);
     }
   }
 
