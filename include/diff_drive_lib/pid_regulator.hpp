@@ -39,10 +39,10 @@ class PIDRegulator {
   /**
    * Perform an update routine of the regulator.
    * @param error Current error
-   * @param dt_ms Time elapsed since the last call to update function
+   * @param dt_ms Time elapsed since the last call to update function in milliseconds
    * @return Output of the regulator
    */
-  float update(float error, uint16_t dt_ms) {
+  float update(float error, uint32_t dt_ms) {
     if (dt_ms == 0) return 0.0F;
 
     float err_diff;
@@ -54,7 +54,7 @@ class PIDRegulator {
     }
     last_error_ = error;
 
-    const float dt_s = dt_ms * 0.001F;
+    const float dt_s = static_cast<float>(dt_ms) * 0.001F;
 
     // P term + D term
     float val = Kp_ * error + Kd_ * err_diff / dt_s;
