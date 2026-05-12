@@ -23,6 +23,8 @@ class MecanumController : public RobotController<VELOCITY_ROLLING_WINDOW_SIZE> {
   }
 
   void update(const uint32_t dt_ms) override {
+    if (dt_ms == 0) return;
+
     this->checkTimeout(dt_ms);
 
     const float dt_s = static_cast<float>(dt_ms) * 0.001F;
