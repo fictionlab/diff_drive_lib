@@ -3,16 +3,9 @@
 #include <cstdint>
 #include <cmath>
 
-namespace diff_drive_lib {
+#include "diff_drive_lib/utils.hpp"
 
-inline float clamp(const float value, const float limit) {
-  if (value > limit)
-    return limit;
-  else if (value < -limit)
-    return -limit;
-  else
-    return value;
-}
+namespace diff_drive_lib {
 
 class PIDRegulator {
  public:
