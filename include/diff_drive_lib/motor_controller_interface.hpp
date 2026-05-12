@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 
+#include "diff_drive_lib/utils.hpp"
+
 namespace diff_drive_lib {
 
 struct MotorControllerInterface {
@@ -63,7 +65,8 @@ struct MotorControllerBase : public MotorControllerInterface {
 
   void setVoltage(float voltage) {
     if (supply_voltage_ > 0.0F) {
-      setPWMDutyCycle((voltage / supply_voltage_) * 100.0F);
+      const float clamped_voltage = clamp(voltage, supply_voltage_);
+      setPWMDutyCycle((clamped_voltage / supply_voltage_) * 100.0F);
     } else {
       setPWMDutyCycle(0.0F);
     }
