@@ -62,9 +62,8 @@ class PIDRegulator {
     // I term
     isum_ += Ki_ * error * dt_s;
 
-    // I-term Anti-windup: limit isum to remaining headroom, but never a negative limit
-    const float headroom = range_ - std::abs(val);
-    isum_ = clamp(isum_, headroom > 0.0F ? headroom : 0.0F);
+    // I-term Anti-windup: clamp isum to range to prevent unbounded accumulation
+    isum_ = clamp(isum_, range_);
 
     // Output
     val = clamp(val + isum_, range_);
