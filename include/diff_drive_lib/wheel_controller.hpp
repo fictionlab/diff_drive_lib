@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -39,6 +40,9 @@ struct WheelParams {
 
   // D constant of the PID regulator.
   float wheel_pid_d = 0.0;
+
+  // The maximum voltage that can be applied to the wheel.
+  float wheel_max_voltage = 30.0F;
 
   // Whether to detect rapid change in encoder tick count.
   bool wheel_encoder_jump_detection_enabled = false;
@@ -107,7 +111,7 @@ class WheelController {
 
     float target_voltage = 0.0F;
     if (enabled_) {
-      pid_reg_.setRange(motor.getSupplyVoltage());
+      pid_reg_.setRange(std::min(params_.wheel_max_voltage, motor.getSupplyVoltage()));
 
       if (op_mode_ == WheelOperationMode::VELOCITY) {
         if (v_now_ == 0.0F && v_target_ == 0.0F) {
